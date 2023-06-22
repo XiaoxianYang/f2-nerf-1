@@ -1,4 +1,3 @@
-import os
 from os.path import join as pjoin
 from copy import deepcopy
 from glob import glob
@@ -19,15 +18,7 @@ class NeRFSceneManager(SceneManager):
     """
 
     def __init__(self, data_dir):
-        # COLMAP
-        if os.path.exists(pjoin(data_dir, 'sparse', '0')):
-            sfm_dir = pjoin(data_dir, 'sparse', '0')
-        # hloc
-        else:
-            sfm_dir = pjoin(data_dir, 'hloc_sfm')
-
-        assert os.path.exists(sfm_dir)
-        super(NeRFSceneManager, self).__init__(sfm_dir)
+        super(NeRFSceneManager, self).__init__(pjoin(data_dir, 'sparse', '0'))
 
     def process(
             self
@@ -124,6 +115,15 @@ class Dataset:
     def __init__(self, data_dir):
         scene_manager = NeRFSceneManager(data_dir)
         self.names, self.poses, self.pix2cam, self.params, self.camtype = scene_manager.process()
+        # mask = ["train" in name and "image_00" in name for name in self.names]
+        # mask = ["train" in name for name in self.names]
+        mask = [True for name in self.names]
+        self.names = np.asarray(self.names)[mask].tolist()
+        self.split = np.asarray([1 if "train" in name else 6 for name in self.names], dtype=np.int8)
+        self.poses = self.poses[mask]
+        name_to_image_id = {name: id for (name, id), not_masked
+                            in zip(scene_manager.name_to_image_id.items(), mask) if not_masked}
+        scene_manager.name_to_image_id = name_to_image_id
         self.cam2pix = np.linalg.inv(self.pix2cam)
         self.n_images = len(self.poses)
 
@@ -141,7 +141,7 @@ class Dataset:
         points3D = scene_manager.points3D
         points3D_ids = scene_manager.point3D_ids
         point3D_id_to_images = scene_manager.point3D_id_to_images
-        image_id_to_image_idx = np.zeros(self.n_images + 10, dtype=np.int32)
+        image_id_to_image_idx = np.zeros(self.n_images + 100, dtype=np.int32)
         for image_name in self.names:
             image_id_to_image_idx[name_to_ids[image_name]] = sorted_image_names.index(image_name)
 
@@ -193,6 +193,7 @@ class Dataset:
                                    self.bounds.reshape([n, -1])], axis=-1)
             data = np.ascontiguousarray(np.array(data).astype(np.float64))
             np.save(pjoin(data_dir, 'cams_meta.npy'), data)
+            np.save(pjoin(data_dir, 'split.npy'), self.split)
         elif 'poses_bounds' in out_mode :
             poses = deepcopy(self.poses)
             image_list = []
