@@ -21,7 +21,7 @@ CAMERA=OPENCV
 USE_GPU=1
 # Replace this with your own local copy of the file.
 # Download from: https://demuc.de/colmap/#download
-VOCABTREE_PATH=/home/ppwang/Projects/f2-nerf/data_local/vocab_tree_flickr100K_words32K.bin
+VOCABTREE_PATH=/usr/local/share/colmap/vocab_tree_flickr100K_words256K.bin
 
 # Run COLMAP.
 
@@ -33,9 +33,12 @@ colmap feature_extractor \
     --SiftExtraction.use_gpu "$USE_GPU"
 
 
-colmap exhaustive_matcher \
-    --database_path "$DATASET_PATH"/database.db \
-    --SiftMatching.use_gpu "$USE_GPU"
+# colmap exhaustive_matcher \
+#     --database_path "$DATASET_PATH"/database.db \
+#     --SiftMatching.use_gpu "$USE_GPU"
+colmap vocab_tree_matcher --VocabTreeMatching.vocab_tree_path $VOCABTREE_PATH \
+--SiftMatching.guided_matching=true --SiftMatching.num_threads -1 --SiftMatching.use_gpu 1 --SiftMatching.gpu_index -1 \
+--database_path "$DATASET_PATH"/database.db
 
 ## Use if your scene has > 500 images
 ## Replace this path with your own local copy of the file.
@@ -67,17 +70,17 @@ colmap image_undistorter \
 cp -r "$DATASET_PATH"/images "$DATASET_PATH"/images_2
 
 pushd "$DATASET_PATH"/images_2
-ls | xargs -P 8 -I {} mogrify -resize 50% {}
+find . -type f | xargs -P 8 -I {} mogrify -resize 50% {}
 popd
 
 cp -r "$DATASET_PATH"/images "$DATASET_PATH"/images_4
 
 pushd "$DATASET_PATH"/images_4
-ls | xargs -P 8 -I {} mogrify -resize 25% {}
+find . -type f | xargs -P 8 -I {} mogrify -resize 25% {}
 popd
 
 cp -r "$DATASET_PATH"/images "$DATASET_PATH"/images_8
 
 pushd "$DATASET_PATH"/images_8
-ls | xargs -P 8 -I {} mogrify -resize 12.5% {}
+find . -type f | xargs -P 8 -I {} mogrify -resize 12.5% {}
 popd
