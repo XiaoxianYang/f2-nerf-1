@@ -66,14 +66,14 @@ void ExpRunner::Train() {
   global_data_pool_->mode_ = RunningMode::TRAIN;
 
   std::string log_dir = base_exp_dir_ + "/logs";
-  fs::create_directories(log_dir);
+  fs::create_directories(log_dir);    
 
   std::vector<float> mse_records;
   float time_per_iter = 0.f;
   StopWatch clock;
 
   float psnr_smooth = -1.0;
-  UpdateAdaParams();
+  UpdateAdaParams(); 
 
   {
     StopWatch watch;
@@ -93,16 +93,16 @@ void ExpRunner::Train() {
       auto render_result = renderer_->Render(rays_o, rays_d, bounds, emb_idx);
       Tensor pred_colors = render_result.colors.index({Slc(0, cur_batch_size)});
       Tensor disparity = render_result.disparity;
-      Tensor color_loss = torch::sqrt((pred_colors - gt_colors).square() + 1e-4f).mean();
+      Tensor color_loss = torch::sqrt((pred_colors - gt_colors).square() + 1e-4f).mean(); // L_recon
 
-      Tensor disparity_loss = disparity.square().mean();
+      Tensor disparity_loss = disparity.square().mean(); // L_Disp
 
       Tensor edge_feats = render_result.edge_feats;
-      Tensor tv_loss = (edge_feats.index({Slc(), 0}) - edge_feats.index({Slc(), 1})).square().mean();
+      Tensor tv_loss = (edge_feats.index({Slc(), 0}) - edge_feats.index({Slc(), 1})).square().mean();  // L_TV
 
-      Tensor sampled_weights = render_result.weights;
+      Tensor sampled_weights = render_result.weights; // 指的是一个ray中取样点sample的color占总color的比重
       Tensor idx_start_end = render_result.idx_start_end;
-      Tensor sampled_var = CustomOps::WeightVar(sampled_weights, idx_start_end);
+      Tensor sampled_var = CustomOps::WeightVar(sampled_weights, idx_start_end); // ?
       Tensor var_loss = (sampled_var + 1e-2).sqrt().mean();
 
       float var_loss_weight = 0.f;
@@ -113,7 +113,7 @@ void ExpRunner::Train() {
         var_loss_weight = float(iter_step_ - var_loss_start_) / float(var_loss_end_ - var_loss_start_) * var_loss_weight_;
       }
 
-      Tensor loss = color_loss + var_loss * var_loss_weight +
+      Tensor loss = color_loss + var_loss * var_loss_weight + // L = L_recon + lambda_Disp * L_Disp + lambda_TV * L_TV
                     disparity_loss * disp_loss_weight_ +
                     tv_loss * tv_loss_weight_;
 
@@ -147,9 +147,7 @@ void ExpRunner::Train() {
       }
 
       if (iter_step_ % vis_freq_ == 0) {
-        int t = iter_step_ / vis_freq_;
-        int vis_idx;
-        vis_idx = (iter_step_ / vis_freq_) % dataset_->test_set_.size();
+        auto vis_idx = (iter_step_ / vis_freq_) % dataset_->test_set_.size();
         vis_idx = dataset_->test_set_[vis_idx];
         VisualizeImage(vis_idx);
       }
