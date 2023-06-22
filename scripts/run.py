@@ -17,17 +17,19 @@ backup_file_patterns = [
 
 def make_image_list(data_path, factor):
     image_list = []
-    suffix = ['*.jpg', '*.png', '*.JPG', '*.jpeg']
-    if 0.999 < factor < 1.001:
-        for suf in suffix:
-            image_list += glob(os.path.join(data_path, 'images', suf)) +\
-                          glob(os.path.join(data_path, 'images_1', suf))
-    else:
+    if not (0.999 < factor < 1.001):
         f_int = int(np.round(factor))
-        for suf in suffix:
-            image_list += glob(os.path.join(data_path, 'images_{}'.format(f_int), suf))
+        image_list = glob(os.path.join(data_path, 'images_{}/train/image_00'.format(f_int), '*.png')) + \
+                     glob(os.path.join(data_path, 'images_{}/train/image_01'.format(f_int), '*.png')) + \
+                     glob(os.path.join(data_path, 'images_{}/test/image_00'.format(f_int), '*.png')) + \
+                     glob(os.path.join(data_path, 'images_{}/test/image_01'.format(f_int), '*.png'))
 
-    assert len(image_list) > 0, "No image found"
+    if len(image_list) == 0:
+        image_list = glob(os.path.join(data_path, 'images/train/image_00', '*.png')) + \
+                     glob(os.path.join(data_path, 'images/train/image_01', '*.png')) + \
+                     glob(os.path.join(data_path, 'images/test/image_00', '*.png')) + \
+                     glob(os.path.join(data_path, 'images/test/image_01', '*.png'))
+
     image_list.sort()
 
     f = open(os.path.join(data_path, 'image_list.txt'), 'w')
@@ -35,7 +37,7 @@ def make_image_list(data_path, factor):
         f.write(image_path + '\n')
 
 
-@hydra.main(version_base=None, config_path='../confs', config_name='default')
+@hydra.main(config_path='../confs', config_name='default')
 def main(conf: DictConfig) -> None:
     if 'work_dir' in conf:
         base_dir = conf['work_dir']
