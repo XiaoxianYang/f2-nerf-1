@@ -264,7 +264,17 @@ __global__ void RayMarchKernel(int n_rays, float sample_l, bool scale_by_dis,
     QueryFrameTransformJac(cur_trans, cur_xyz, &jac);
     Wec3f proj_xyz = jac * rays_d;
     float exp_march_step_warp = sample_l * rays_noise[pts_ptr];
-    exp_march_step = exp_march_step_warp / (proj_xyz.norm() + 1e-6f);
+    bool uniform_sampling = false;
+    bool exp_sampling = false;
+    bool inv_sphere_sampling = true;
+    if(uniform_sampling){
+      exp_march_step = (cur_far - cur_near) / 4;
+      pro_xyz = rays_d / rays_d.norm();
+    }
+
+    else{
+      exp_march_step = exp_march_step_warp / (proj_xyz.norm() + 1e-6f);
+    }
     if (scale_by_dis) {
       exp_march_step *= cur_radius_clip;
     }
