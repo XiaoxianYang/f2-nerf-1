@@ -25,7 +25,8 @@ public:
   Hash3DAnchored(GlobalDataPool* global_data_pool_);
 
   Tensor AnchoredQuery(const Tensor& points,           // [ n_points, 3 ]
-                       const Tensor& anchors           // [ n_points, 3 ]
+                       const Tensor& anchors,           // [ n_points, 3 ]
+                       const Tensor& norm_points
                ) override;
 
   int LoadStates(const std::vector<Tensor>& states, int idx) override;

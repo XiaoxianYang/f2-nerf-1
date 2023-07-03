@@ -108,11 +108,10 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
     torch::NoGradGuard no_grad_guard;
 
     Tensor pts  = sample_result_.pts;
+    Tensor norm_pts = sample_result_.norm_pts;
     Tensor dirs = sample_result_.dirs;
     Tensor anchors = sample_result_.anchors.index({"...", 0}).contiguous();
-    Tensor centers = sample_result_.centers;
-    Tensor side_lens = sample_result_.side_lens;
-    Tensor scene_feat = scene_field_->AnchoredQuery(pts, anchors);
+    Tensor scene_feat = scene_field_->AnchoredQuery(pts, anchors,norm_pts);
     Tensor sampled_density = DensityAct(scene_feat.index({ Slc(), Slc(0, 1) }));
 
     Tensor sampled_dt = sample_result_.dt;
@@ -131,8 +130,7 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
     sample_result_early_stop.dt = sample_result_.dt.index({mask_idx}).contiguous();
     sample_result_early_stop.t = sample_result_.t.index({mask_idx}).contiguous();
     sample_result_early_stop.anchors = sample_result_.anchors.index({mask_idx}).contiguous();
-    sample_result_early_stop.centers = sample_result_.centers.index({mask_idx}).contiguous();
-    sample_result_early_stop.side_lens = sample_result_.side_lens.index({mask_idx}).contiguous();
+    sample_result_early_stop.norm_pts = sample_result_.norm_pts.index({mask_idx}).contiguous();
 
     sample_result_early_stop.first_oct_dis = sample_result_.first_oct_dis.clone();
     sample_result_early_stop.pts_idx_bounds = FilterIdxBounds(sample_result_.pts_idx_bounds, mask);
@@ -156,8 +154,7 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
   Tensor pts  = sample_result_early_stop.pts;
   Tensor dirs = sample_result_early_stop.dirs;
   Tensor anchors = sample_result_early_stop.anchors.index({"...", 0}).contiguous();
-  Tensor centers = sample_result_early_stop.centers;
-  Tensor side_lens = sample_result_early_stop.side_lens;
+  Tensor norm_pts = sample_result_early_stop.norm_pts;
   n_all_pts = pts.size(0);
 
   // Feature variation loss.
@@ -169,13 +166,13 @@ RenderResult Renderer::Render(const Tensor& rays_o, const Tensor& rays_d, const 
 
     Tensor query_pts = torch::cat({ pts, edge_pts }, 0);
     Tensor query_anchors = torch::cat({ anchors, edge_anchors }, 0);
-    Tensor all_feat = scene_field_->AnchoredQuery(query_pts, query_anchors);
+    Tensor all_feat = scene_field_->AnchoredQuery(query_pts, query_anchors,query_pts);
     scene_feat = all_feat.slice(0, 0, n_all_pts);
     edge_feat = all_feat.slice(0, n_all_pts, n_all_pts + n_edge_pts * 2).reshape({ n_edge_pts, 2, -1 });
   }
   else {
     // Query density &gra color
-    scene_feat = scene_field_->AnchoredQuery(pts, anchors);  // [n_pts, feat_dim];
+    scene_feat = scene_field_->AnchoredQuery(pts, anchors,norm_pts);  // [n_pts, feat_dim];
   }
 
 

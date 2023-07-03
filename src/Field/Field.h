@@ -21,7 +21,7 @@ public:
     return Tensor();
   }
 
-  virtual Tensor AnchoredQuery(const Tensor& coords, const Tensor& anchors) {
+  virtual Tensor AnchoredQuery(const Tensor& coords, const Tensor& anchors, const Tensor& norm_points) {
     CHECK(false) << "Not implemented";
     return Tensor();
   }

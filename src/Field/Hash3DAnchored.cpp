@@ -81,7 +81,7 @@ Hash3DAnchored::Hash3DAnchored(GlobalDataPool* global_data_pool) {
   mlp_ = std::make_unique<TCNNWP>(global_data_pool_, N_LEVELS * N_CHANNELS, mlp_out_dim_, mlp_hidden_dim_, n_hidden_layers_);
 }
 
-Tensor Hash3DAnchored::AnchoredQuery(const Tensor& points, const Tensor& anchors) {
+Tensor Hash3DAnchored::AnchoredQuery(const Tensor& points, const Tensor& anchors, const Tensor& norm_points) {
 #ifdef PROFILE
   ScopeWatch watch(__func__);
 #endif
