@@ -347,7 +347,7 @@ void ExpRunner::TestImages() {
   float cnt = 0.f;
   YAML::Node out_info;
   {
-    fs::create_directories(base_exp_dir_ + "/test_images");
+    fs::create_directories(base_exp_dir_ + "/test_images_no_edges_norm");
     for (int i: dataset_->test_set_) {
       auto [rays_o, rays_d, bounds] = dataset_->RaysOfCamera(i);
       auto [pred_colors, first_oct_dis, pred_disps] = RenderWholeImage(rays_o, rays_d, bounds);  // At this stage, the returned number is
@@ -369,11 +369,11 @@ void ExpRunner::TestImages() {
       std::cout << fmt::format("{}: {}", i, psnr) << std::endl;
       psnr_sum += psnr;
       cnt += 1.f;
-      Utils::WriteImageTensor(base_exp_dir_ + "/test_images/" + fmt::format("color_{}_{:0>3d}.png", iter_step_, i),
+      Utils::WriteImageTensor(base_exp_dir_ + "/test_images_no_edges_norm/" + fmt::format("color_{}_{:0>3d}.png", iter_step_, i),
                              pred_colors);
-      Utils::WriteImageTensor(base_exp_dir_ + "/test_images/" + fmt::format("depth_{}_{:0>3d}.png", iter_step_, i),
+      Utils::WriteImageTensor(base_exp_dir_ + "/test_images_no_edges_norm/" + fmt::format("depth_{}_{:0>3d}.png", iter_step_, i),
                               pred_disps.repeat({1, 1, 3}));
-      Utils::WriteImageTensor(base_exp_dir_ + "/test_images/" + fmt::format("oct_depth_{}_{:0>3d}.png", iter_step_, i),
+      Utils::WriteImageTensor(base_exp_dir_ + "/test_images_no_edges_norm/" + fmt::format("oct_depth_{}_{:0>3d}.png", iter_step_, i),
                              first_oct_dis.repeat({1, 1, 3}));
 
     }
@@ -382,7 +382,7 @@ void ExpRunner::TestImages() {
   std::cout << fmt::format("Mean psnr: {}", mean_psnr) << std::endl;
   out_info["mean_psnr"] = mean_psnr;
 
-  std::ofstream info_fout(base_exp_dir_ + "/test_images/info.yaml");
+  std::ofstream info_fout(base_exp_dir_ + "/test_images_no_edges_norm/info.yaml");
   info_fout << out_info;
 
   global_data_pool_->mode_ = prev_mode;
