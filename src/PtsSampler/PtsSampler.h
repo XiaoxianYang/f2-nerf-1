@@ -19,6 +19,8 @@ struct SampleResultFlex {
   Tensor anchors;                       // [ n_all_pts, 3 ]
   Tensor pts_idx_bounds;                // [ n_rays, 2 ] // start, end
   Tensor first_oct_dis;                 // [ n_rays, 1 ]
+  Tensor centers;
+  Tensor side_lens;
 };
 
 class PtsSampler : public Pipe {
