@@ -30,9 +30,13 @@ __global__ void Hash3DAnchoredForwardKernel(int n_points, int n_volumes,
   unsigned prim_a, prim_b, prim_c, local_size;
   {
     const int offset = (level_idx * n_volumes + volume_idx[0]) * 3;
-    prim_a = prim_pool[offset + 0];
-    prim_b = prim_pool[offset + 1];
-    prim_c = prim_pool[offset + 2];
+    // // const int offset = (level_idx * n_volumes ) * 3;
+    // // prim_a = prim_pool[offset + 0];
+    // // prim_b = prim_pool[offset + 1];
+    // // prim_c = prim_pool[offset + 2];
+    // prim_a = 1;
+    // prim_b = 2654435761;
+    // prim_c = 805459861;
   }
   feat_pool = feat_pool + feat_local_idx[level_idx];
   local_size = feat_local_size[level_idx];
@@ -101,9 +105,13 @@ __global__ void Hash3DAnchoredBackwardKernel(int n_points, int n_volumes,
   unsigned prim_a, prim_b, prim_c, local_size;
   {
     const int offset = (level_idx * n_volumes + volume_idx[0]) * 3;
-    prim_a = prim_pool[offset + 0];
-    prim_b = prim_pool[offset + 1];
-    prim_c = prim_pool[offset + 2];
+    // const int offset = (level_idx * n_volumes ) * 3;
+    // prim_a = prim_pool[offset + 0];
+    // prim_b = prim_pool[offset + 1];
+    // prim_c = prim_pool[offset + 2];
+    // prim_a = 1;
+    // prim_b = 2654435761;
+    // prim_c = 805459861;
   }
 
   grad_out = grad_out + feat_local_idx[level_idx];

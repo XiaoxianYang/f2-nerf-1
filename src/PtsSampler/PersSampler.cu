@@ -304,7 +304,7 @@ __global__ void RayMarchKernel(int n_rays, float sample_l, bool scale_by_dis,
       sampled_ts[pts_ptr] = cur_t;
       sampled_oct_idx[pts_ptr] = cur_oct_idx;
       sampled_dirs[pts_ptr] = rays_d;
-      bool space_warping = false;
+      bool space_warping = true;
       bool normalize = false;
       if(space_warping){
         QueryFrameTransform(cur_trans, cur_xyz, &fill_xyz);
@@ -484,7 +484,7 @@ __global__ void GetEdgeSamplesKernel(int n_pts, EdgePool* edge_pool, TransInfo* 
   int a = edge_pool->t_idx_a; int b = edge_pool->t_idx_b;
   QueryFrameTransform(trans[a], world_pts, &warp_pts_a);
   QueryFrameTransform(trans[b], world_pts, &warp_pts_b);
-  bool warping = false;
+  bool warping = true;
   if(warping)
   out_pts[pts_idx * 2] = warp_pts_a;
   out_pts[pts_idx * 2 + 1] = warp_pts_b;

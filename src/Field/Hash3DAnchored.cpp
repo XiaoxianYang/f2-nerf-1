@@ -89,6 +89,7 @@ Tensor Hash3DAnchored::AnchoredQuery(const Tensor& points, const Tensor& anchors
   auto info = torch::make_intrusive<Hash3DAnchoredInfo>();
 
   query_points_ = ((points + 1.f) * .5f).contiguous();   // [-1, 1] -> [0, 1]
+  // query_points = norm_points;
   query_volume_idx_ = anchors.contiguous();
   info->hash3d_ = this;
   Tensor feat = torch::autograd::Hash3DAnchoredFunction::apply(feat_pool_, torch::IValue(info))[0];  // [n_points, n_levels * n_channels];
