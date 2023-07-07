@@ -31,9 +31,9 @@ __global__ void Hash3DAnchoredForwardKernel(int n_points, int n_volumes,
   {
     const int offset = (level_idx * n_volumes + volume_idx[0]) * 3;
     // // const int offset = (level_idx * n_volumes ) * 3;
-    // // prim_a = prim_pool[offset + 0];
-    // // prim_b = prim_pool[offset + 1];
-    // // prim_c = prim_pool[offset + 2];
+    prim_a = prim_pool[offset + 0];
+    prim_b = prim_pool[offset + 1];
+    prim_c = prim_pool[offset + 2];
     // prim_a = 1;
     // prim_b = 2654435761;
     // prim_c = 805459861;
@@ -106,9 +106,9 @@ __global__ void Hash3DAnchoredBackwardKernel(int n_points, int n_volumes,
   {
     const int offset = (level_idx * n_volumes + volume_idx[0]) * 3;
     // const int offset = (level_idx * n_volumes ) * 3;
-    // prim_a = prim_pool[offset + 0];
-    // prim_b = prim_pool[offset + 1];
-    // prim_c = prim_pool[offset + 2];
+    prim_a = prim_pool[offset + 0];
+    prim_b = prim_pool[offset + 1];
+    prim_c = prim_pool[offset + 2];
     // prim_a = 1;
     // prim_b = 2654435761;
     // prim_c = 805459861;
